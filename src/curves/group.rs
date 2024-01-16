@@ -6,10 +6,10 @@ use ark_ec::{
 };
 
 /// G1_GENERATOR_X
-pub const G1_GENERATOR_X: fields::Fq = MontFp!("11237173340785249450");
+pub const G1_GENERATOR_X: fields::Fq = MontFp!("499025949");
 
 /// G1_GENERATOR_Y
-pub const G1_GENERATOR_Y: fields::Fq = MontFp!("10893031506520704136");
+pub const G1_GENERATOR_Y: fields::Fq = MontFp!("1092546957");
 
 #[derive(Clone, Default, PartialEq, Eq)]
 pub struct Config;
@@ -30,10 +30,10 @@ impl CurveConfig for Config {
 
 impl SWCurveConfig for Config {
     /// COEFF_A
-    const COEFF_A: fields::Fq = MontFp!("6211002006250565559");
+    const COEFF_A: fields::Fq = MontFp!("1251352944");
 
     /// COEFF_B
-    const COEFF_B: fields::Fq = MontFp!("14749063037593397239");
+    const COEFF_B: fields::Fq = MontFp!("2939594618");
 
     /// AFFINE_GENERATOR_COEFFS = (G1_GENERATOR_X, G1_GENERATOR_Y)
     const GENERATOR: GAffine = GAffine::new_unchecked(G1_GENERATOR_X, G1_GENERATOR_Y);
