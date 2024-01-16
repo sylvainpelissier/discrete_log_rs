@@ -1,5 +1,5 @@
 use ark_ec::Group;
-use ark_ff::MontFp;
+use ark_ff::{Field, MontFp};
 use num_bigint::BigUint;
 
 pub mod fields;
@@ -32,10 +32,10 @@ fn update(P : curves::GProjective, Q : curves::GProjective, a_i: &mut Fr, b_i: &
 
 fn main() {
     // Inputs
-    let i: fields::Fq = MontFp!("2");
-    let P = GAffine::get_point_from_x_unchecked(i, true).unwrap();
+    let i: fields::Fq = MontFp!("499025949");
+    let P = GAffine::get_point_from_x_unchecked(i, false).unwrap();
     let P: GProjective = P.into(); 
-    let x: Fr = MontFp!("1337");
+    let x: Fr = MontFp!("13");
     let Q = P * x;
 
     // Temporary variable
@@ -70,10 +70,6 @@ fn main() {
             break;
         }
         i +=1;
-
-        if i % 1000 == 0{
-            println!("i {:?}", i);
-        }
     }
-    println!("Found a solution {:?}", b_i);
+    println!("Found a solution {:?}", (b_i - b_2i).inverse().unwrap() * (a_i - a_2i));
 }
