@@ -2,7 +2,7 @@ use crate::fields;
 use ark_ff::{Field, MontFp};
 use ark_ec::{
     models::{short_weierstrass::SWCurveConfig, CurveConfig},
-    short_weierstrass::{Affine},
+    short_weierstrass::{Affine, Projective},
 };
 
 /// G1_GENERATOR_X
@@ -15,6 +15,7 @@ pub const G1_GENERATOR_Y: fields::Fq = MontFp!("10893031506520704136");
 pub struct Config;
 
 pub type GAffine = Affine<Config>;
+pub type GProjective = Projective<Config>;
 
 impl CurveConfig for Config {
     type BaseField = fields::Fq;

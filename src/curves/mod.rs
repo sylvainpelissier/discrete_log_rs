@@ -1,2 +1,2 @@
 pub mod group;
-pub use self::group::GAffine;
+pub use self::group::{GAffine, GProjective};
