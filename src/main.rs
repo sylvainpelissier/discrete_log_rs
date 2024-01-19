@@ -42,27 +42,28 @@ fn main() {
     let x: Fr = Fr::rand(&mut rng);
     println!("x = {}", x);
     let Q = P * x;
-
-    // Temporary variable
-    let mut a_i: Fr = Fr::rand(&mut rng);
-    let mut b_i: Fr = Fr::rand(&mut rng);
-    let mut a_2i: Fr = Fr::rand(&mut rng);
-    let mut b_2i: Fr = Fr::rand(&mut rng);
-    
-    let mut X_i = P*a_i + Q*b_i;
-    let mut X_2i = P*a_2i + Q*b_2i;
-    
-    println!("X_i {:?}", X_i);
     println!("P {:?}", P);
     println!("Q {:?}", Q);
-
-    
+    // Temporary variable
+     
     let modulus: BigUint = (Fr::MODULUS).into();
-    println!("modulus {:?}", modulus.to_u64_digits()[0]);
+    let sqrt = (modulus.to_u64_digits()[0] as f64).sqrt() as u64;
+    println!("sqrt {:?}", sqrt);
     let mut xp = x + ONE;
-    while x != xp {
-        let mut i: u64 = 0;
-        while i <  modulus.to_u64_digits()[0] {
+    let mut i: u64 = 0;
+    let mut j: u64 = 0;
+    while j < 1000 && x != xp {
+        let mut a_i: Fr = Fr::rand(&mut rng);
+        let mut b_i: Fr = Fr::rand(&mut rng);
+        let mut a_2i: Fr = Fr::rand(&mut rng);
+        let mut b_2i: Fr = Fr::rand(&mut rng);
+        
+        let mut X_i = P*a_i + Q*b_i;
+        let mut X_2i = P*a_2i + Q*b_2i;
+        
+        //println!("X_i {:?}", X_i);
+        i = 0;
+        while i <  100 * sqrt {
             update(P,  Q, &mut a_i, &mut b_i, &mut X_i);
             
             // Double step
@@ -75,8 +76,16 @@ fn main() {
             }
             i +=1;
         }
+        j+=1;
     }
-    println!("Iterations {}", i);
-    println!("Found a solution {}", xp);
-    println!("Verification {}", P*xp);
+    if j < 1000 {
+        println!("j = {j}");
+        println!("i = {i}");
+        println!("x = {}", x);
+        println!("Found a solution {}", xp);
+        println!("Verification {}", P*xp);
+    }
+    else {
+        println!("No solution found");
+    }
 }
