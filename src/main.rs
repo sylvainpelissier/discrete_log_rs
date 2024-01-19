@@ -1,29 +1,31 @@
 use ark_ec::Group;
-use ark_ff::{Field, MontFp};
+use ark_std::{rand, UniformRand};
+use ark_ff::{Field, MontFp, PrimeField};
 use num_bigint::BigUint;
 
 pub mod fields;
 pub mod curves;
 
 use crate::curves::{GAffine, GProjective};
-use crate::fields::{Fr, Fq};
+use crate::fields::{Fr};
 
+
+const ONE : Fr = MontFp!("1");
+const TWO : Fr = MontFp!("2");
 
 fn update(P : curves::GProjective, Q : curves::GProjective, a_i: &mut Fr, b_i: &mut Fr, X_i : &mut GProjective) {
-    let one : Fr = MontFp!("1");
-    let two : Fr = MontFp!("2");
     let case : BigUint = (X_i.x).into();
     let case: u64 = case.to_u64_digits()[0];
     match case % 3 {
         0 => {  
-                *b_i = *b_i + one;
+                *b_i = *b_i + ONE;
                 *X_i = *X_i + Q;
         }
-        1 => {  *a_i = *a_i * two;
-                *b_i = *b_i * two;
+        1 => {  *a_i = *a_i * TWO;
+                *b_i = *b_i * TWO;
                 *X_i = X_i.double();
         }
-        2 => {  *a_i = *a_i + one;
+        2 => {  *a_i = *a_i + ONE;
                 *X_i = *X_i + P;
         }
         _ => panic!("Wrong case.")
@@ -31,19 +33,21 @@ fn update(P : curves::GProjective, Q : curves::GProjective, a_i: &mut Fr, b_i: &
 }
 
 fn main() {
+    let mut rng = rand::thread_rng();
+
     // Inputs
-    let i: fields::Fq = MontFp!("499025949");
+    let i: fields::Fq = MontFp!("3510221");
     let P = GAffine::get_point_from_x_unchecked(i, false).unwrap();
     let P: GProjective = P.into(); 
-    let x: Fr = MontFp!("13");
+    let x: Fr = Fr::rand(&mut rng);
+    println!("x = {}", x);
     let Q = P * x;
 
     // Temporary variable
-    let i: Fq = MontFp!("4");
-    let mut a_i: Fr = MontFp!("31");
-    let mut b_i: Fr = MontFp!("78");
-    let mut a_2i: Fr = MontFp!("1378");
-    let mut b_2i: Fr = MontFp!("2379");
+    let mut a_i: Fr = Fr::rand(&mut rng);
+    let mut b_i: Fr = Fr::rand(&mut rng);
+    let mut a_2i: Fr = Fr::rand(&mut rng);
+    let mut b_2i: Fr = Fr::rand(&mut rng);
     
     let mut X_i = P*a_i + Q*b_i;
     let mut X_2i = P*a_2i + Q*b_2i;
@@ -52,24 +56,27 @@ fn main() {
     println!("P {:?}", P);
     println!("Q {:?}", Q);
 
-    let mut i: u64 = 0;
-    while i < 5 {
-        update(P,  Q, &mut a_i, &mut b_i, &mut X_i);
-        
-        // Double step
-        update(P,  Q, &mut a_2i, &mut b_2i, &mut X_2i);
-        update(P,  Q, &mut a_2i, &mut b_2i, &mut X_2i);
-        /*println!("X_i {:?}", X_i);
-        println!("X_2i {:?}", X_2i);
-        println!("a_i {:?}", a_i);
-        println!("b_i {:?}", b_i);
-        println!("a_2i {:?}", a_2i);
-        println!("b_2i {:?}", b_2i);*/
+    
+    let modulus: BigUint = (Fr::MODULUS).into();
+    println!("modulus {:?}", modulus.to_u64_digits()[0]);
+    let mut xp = x + ONE;
+    while x != xp {
+        let mut i: u64 = 0;
+        while i <  modulus.to_u64_digits()[0] {
+            update(P,  Q, &mut a_i, &mut b_i, &mut X_i);
+            
+            // Double step
+            update(P,  Q, &mut a_2i, &mut b_2i, &mut X_2i);
+            update(P,  Q, &mut a_2i, &mut b_2i, &mut X_2i);
 
-        if X_i == X_2i {
-            break;
+            if X_i == X_2i {
+                xp = (b_i - b_2i).inverse().unwrap() * (a_2i - a_i);
+                break;
+            }
+            i +=1;
         }
-        i +=1;
     }
-    println!("Found a solution {:?}", (b_i - b_2i).inverse().unwrap() * (a_i - a_2i));
+    println!("Iterations {}", i);
+    println!("Found a solution {}", xp);
+    println!("Verification {}", P*xp);
 }
